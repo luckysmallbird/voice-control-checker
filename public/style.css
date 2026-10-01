@@ -76,6 +76,7 @@ input[type="text"], select {
     margin-bottom: 10px;
     font-weight: normal;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 button {
