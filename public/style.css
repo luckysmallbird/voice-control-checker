@@ -70,7 +70,8 @@ input[type="text"], select {
 }
 
 .checkbox-item {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     margin-right: 20px;
     margin-bottom: 10px;
     font-weight: normal;

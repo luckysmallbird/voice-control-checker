@@ -16,34 +16,62 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const groupDiv = document.createElement('div');
-            groupDiv.className = 'feature-group';
-            
+            // 將 features 依據 availableModes 進行分組
+            const groups = {};
             data.features.forEach(feat => {
-                const label = document.createElement('label');
-                label.className = 'checkbox-item';
-                
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.value = feat.id;
-                cb.className = 'feature-checkbox';
-                
-                label.appendChild(cb);
-                label.appendChild(document.createTextNode(' ' + feat.label));
-
-                if (feat.inputType === 'text') {
-                    const textInput = document.createElement('input');
-                    textInput.type = 'text';
-                    textInput.id = `input_${feat.id}`;
-                    textInput.value = feat.type_default || '';
-                    textInput.className = 'feature-text-input';
-                    label.appendChild(textInput);
+                let groupName = 'CommonSetting';
+                // 找出是否有 availableModes 條件
+                if (feat.checks && feat.checks.length > 0) {
+                    const checkWithMode = feat.checks.find(c => c.condition && c.condition.availableModes);
+                    if (checkWithMode) {
+                        groupName = checkWithMode.condition.availableModes;
+                    }
                 }
-
-                groupDiv.appendChild(label);
+                
+                if (!groups[groupName]) {
+                    groups[groupName] = [];
+                }
+                groups[groupName].push(feat);
             });
-            
-            featuresContainer.appendChild(groupDiv);
+
+            // 渲染各個群組
+            for (const [groupName, features] of Object.entries(groups)) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'feature-group';
+                
+                const groupTitle = document.createElement('h3');
+                groupTitle.textContent = groupName;
+                groupDiv.appendChild(groupTitle);
+
+                features.forEach(feat => {
+                    const label = document.createElement('label');
+                    label.className = 'checkbox-item';
+                    
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.value = feat.id;
+                    cb.className = 'feature-checkbox';
+                    
+                    label.appendChild(cb);
+                    
+                    const span = document.createElement('span');
+                    span.textContent = ' ' + feat.label;
+                    label.appendChild(span);
+
+                    if (feat.inputType === 'text') {
+                        const textInput = document.createElement('input');
+                        textInput.type = 'text';
+                        textInput.id = `input_${feat.id}`;
+                        textInput.value = feat.type_default || '';
+                        textInput.className = 'feature-text-input';
+                        label.appendChild(textInput);
+                    }
+
+                    groupDiv.appendChild(label);
+                });
+                
+                featuresContainer.appendChild(groupDiv);
+            }
         } catch (e) {
             featuresContainer.innerHTML = '<p style="color: red;">載入功能清單失敗</p>';
         }
