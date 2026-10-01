@@ -55,6 +55,22 @@ function readCSV(filePath) {
     });
 }
 
+// 取得歷史比對紀錄
+app.get('/api/history', (req, res) => {
+    try {
+        const logPath = path.join(__dirname, 'config', 'userlog.jsonl');
+        if (!fs.existsSync(logPath)) {
+            return res.json([]);
+        }
+        const fileContent = fs.readFileSync(logPath, 'utf8');
+        const lines = fileContent.trim().split('\n');
+        const history = lines.filter(line => line).map(line => JSON.parse(line));
+        res.json(history.reverse());
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // 執行比對邏輯
 app.post('/api/check', async (req, res) => {
     const { folderPath, modelId, deviceType, selectedFeatures, featureInputs = {} } = req.body;
@@ -153,6 +169,18 @@ app.post('/api/check', async (req, res) => {
                 results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'error', message: '缺少資料設定' });
             }
         }
+
+        // 記錄到 userlog.jsonl
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            folderPath,
+            modelId,
+            deviceType,
+            selectedFeatures,
+            featureInputs,
+            results
+        };
+        fs.appendFileSync(path.join(__dirname, 'config', 'userlog.jsonl'), JSON.stringify(logEntry) + '\n', 'utf8');
 
         res.json({ results });
 

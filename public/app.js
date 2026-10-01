@@ -77,6 +77,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function renderReport(results) {
+        document.getElementById('reportSection').style.display = 'block';
+        const tbody = document.getElementById('reportBody');
+        tbody.innerHTML = '';
+
+        results.forEach(res => {
+            const tr = document.createElement('tr');
+            let statusClass = '';
+            if (res.status === 'pass') statusClass = 'status-pass';
+            else if (res.status === 'error') statusClass = 'status-error';
+
+            tr.innerHTML = `
+                <td>${res.feature}</td>
+                <td>${res.table}</td>
+                <td>${res.desc}</td>
+                <td class="${statusClass}">${res.message}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    let historyData = [];
+    async function loadHistory() {
+        try {
+            const response = await fetch('/api/history');
+            historyData = await response.json();
+            const select = document.getElementById('historySelect');
+            select.innerHTML = '<option value="">-- 選擇歷史紀錄以自動還原 --</option>';
+            historyData.forEach((record, index) => {
+                const dateStr = new Date(record.timestamp).toLocaleString();
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `[${dateStr}] 機種: ${record.modelId} (${record.deviceType})`;
+                select.appendChild(option);
+            });
+        } catch (e) {
+            console.error('載入歷史紀錄失敗', e);
+        }
+    }
+
     // 載入下拉選單設定
     try {
         const response = await fetch('/api/config');
@@ -105,6 +145,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (config.deviceTypes.length > 0) {
             renderFeatures(config.deviceTypes[0].id);
         }
+
+        loadHistory();
+
+        document.getElementById('historySelect').addEventListener('change', async (e) => {
+            const index = e.target.value;
+            if (index === '') return;
+            const record = historyData[index];
+            if (!record) return;
+
+            // 1. 還原基本欄位
+            document.getElementById('folderPath').value = record.folderPath;
+            document.getElementById('modelId').value = record.modelId;
+            document.getElementById('deviceType').value = record.deviceType;
+
+            // 2. 重新渲染該家電的 Checkbox (等待完成)
+            await renderFeatures(record.deviceType);
+
+            // 3. 還原勾選狀態與輸入框
+            record.selectedFeatures.forEach(id => {
+                const cb = document.querySelector(`.feature-checkbox[value="${id}"]`);
+                if (cb) cb.checked = true;
+                
+                if (record.featureInputs && record.featureInputs[id] !== undefined) {
+                    const input = document.getElementById(`input_${id}`);
+                    if (input) input.value = record.featureInputs[id];
+                }
+            });
+
+            // 4. 顯示歷史的比對報告
+            renderReport(record.results);
+        });
 
     } catch (e) {
         alert('無法載入設定檔，請確認後端 Server 是否正常運作');
@@ -146,25 +217,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // 渲染比對結果表格
-            document.getElementById('reportSection').style.display = 'block';
-            const tbody = document.getElementById('reportBody');
-            tbody.innerHTML = '';
-
-            data.results.forEach(res => {
-                const tr = document.createElement('tr');
-                
-                let statusClass = '';
-                if (res.status === 'pass') statusClass = 'status-pass';
-                else if (res.status === 'error') statusClass = 'status-error';
-
-                tr.innerHTML = `
-                    <td>${res.feature}</td>
-                    <td>${res.table}</td>
-                    <td>${res.desc}</td>
-                    <td class="${statusClass}">${res.message}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+            renderReport(data.results);
+            
+            // 刷新歷史紀錄選單
+            loadHistory();
 
         } catch (e) {
             alert('執行比對時發生系統錯誤，請查看後端 Log');
