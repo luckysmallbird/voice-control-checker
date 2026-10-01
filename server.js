@@ -57,7 +57,7 @@ function readCSV(filePath) {
 
 // 執行比對邏輯
 app.post('/api/check', async (req, res) => {
-    const { folderPath, modelId, deviceType, selectedFeatures } = req.body;
+    const { folderPath, modelId, deviceType, selectedFeatures, featureInputs = {} } = req.body;
     
     const targetFolder = path.resolve(folderPath);
     if (!fs.existsSync(targetFolder)) {
@@ -77,9 +77,19 @@ app.post('/api/check', async (req, res) => {
         for (const feature of featuresConfig.features || []) {
             if (selectedFeatures.includes(feature.id)) {
                 feature.checks.forEach(check => {
+                    const finalCondition = {};
+                    for (const [k, v] of Object.entries(check.condition)) {
+                        if (typeof v === 'string' && v === '{INPUT_VALUE}') {
+                            finalCondition[k] = featureInputs[feature.id];
+                        } else {
+                            finalCondition[k] = v;
+                        }
+                    }
                     allChecks.push({
                         featureLabel: feature.label,
-                        ...check
+                        table: check.table,
+                        desc: check.desc,
+                        condition: finalCondition
                     });
                 });
             }

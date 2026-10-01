@@ -30,6 +30,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 label.appendChild(cb);
                 label.appendChild(document.createTextNode(' ' + feat.label));
+
+                if (feat.inputType === 'text') {
+                    const textInput = document.createElement('input');
+                    textInput.type = 'text';
+                    textInput.id = `input_${feat.id}`;
+                    textInput.value = feat.type_default || '';
+                    textInput.className = 'feature-text-input';
+                    label.appendChild(textInput);
+                }
+
                 groupDiv.appendChild(label);
             });
             
@@ -80,6 +90,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const checkboxes = document.querySelectorAll('.feature-checkbox:checked');
         const selectedFeatures = Array.from(checkboxes).map(cb => cb.value);
+        
+        const featureInputs = {};
+        selectedFeatures.forEach(id => {
+            const textInput = document.getElementById(`input_${id}`);
+            if (textInput) {
+                featureInputs[id] = textInput.value.trim();
+            }
+        });
 
         if (!folderPath || !modelId || selectedFeatures.length === 0) {
             alert('請填寫資料夾、機種名稱，並至少勾選一個功能');
@@ -90,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('/api/check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ folderPath, modelId, deviceType, selectedFeatures })
+                body: JSON.stringify({ folderPath, modelId, deviceType, selectedFeatures, featureInputs })
             });
             
             const data = await response.json();
