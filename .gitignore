@@ -1,3 +1,7 @@
 node_modules/
-config/
 README.md
+config/*
+!config/.gitkeep
+!config/features/
+config/features/*
+!config/features/.gitkeep
