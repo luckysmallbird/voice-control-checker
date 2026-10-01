@@ -51,6 +51,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             typeSelect.appendChild(option);
         });
 
+        if (config.defaults) {
+            if (config.defaults.folderPath) document.getElementById('folderPath').value = config.defaults.folderPath;
+            if (config.defaults.modelId) document.getElementById('modelId').value = config.defaults.modelId;
+        }
+
         // 綁定切換事件
         typeSelect.addEventListener('change', (e) => {
             renderFeatures(e.target.value);

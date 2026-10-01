@@ -13,7 +13,12 @@ app.use(express.json());
 app.get('/api/config', (req, res) => {
     try {
         const deviceTypes = JSON.parse(fs.readFileSync(path.join(__dirname, 'config', 'device_types.json')));
-        res.json({ deviceTypes });
+        let defaults = {};
+        const defaultPath = path.join(__dirname, 'config', 'default.json');
+        if (fs.existsSync(defaultPath)) {
+            defaults = JSON.parse(fs.readFileSync(defaultPath));
+        }
+        res.json({ deviceTypes, defaults });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

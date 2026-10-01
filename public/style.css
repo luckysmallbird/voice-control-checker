@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 95%;
     margin: 0 auto;
     background: #fff;
     padding: 30px;
@@ -124,4 +124,15 @@ th {
 .status-error { 
     color: #dc3545; 
     font-weight: bold; 
+}
+
+.top-layout {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.top-layout .section {
+    flex: 1;
+    margin-bottom: 0;
 }
