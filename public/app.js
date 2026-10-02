@@ -80,16 +80,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    let currentMissingChecks = [];
+
     function renderReport(results) {
         document.getElementById('reportSection').style.display = 'block';
         const tbody = document.getElementById('reportBody');
         tbody.innerHTML = '';
+        currentMissingChecks = [];
 
         results.forEach(res => {
             const tr = document.createElement('tr');
             let statusClass = '';
-            if (res.status === 'pass') statusClass = 'status-pass';
-            else if (res.status === 'error') statusClass = 'status-error';
+            if (res.status === 'pass') {
+                statusClass = 'status-pass';
+            } else if (res.status === 'error') {
+                statusClass = 'status-error';
+                if (res.condition) {
+                    currentMissingChecks.push({
+                        table: res.table,
+                        condition: res.condition,
+                        featureLabel: res.feature,
+                        desc: res.desc
+                    });
+                }
+            }
 
             tr.innerHTML = `
                 <td>${res.feature}</td>
@@ -99,6 +113,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
             tbody.appendChild(tr);
         });
+
+        // 處理 SQL 產出區塊顯示
+        const sqlBlock = document.getElementById('sqlBlock');
+        const sqlOutput = document.getElementById('sqlOutput');
+        if (currentMissingChecks.length > 0) {
+            sqlBlock.style.display = 'block';
+            sqlOutput.style.display = 'none';
+            sqlOutput.value = '';
+        } else {
+            sqlBlock.style.display = 'none';
+        }
     }
 
     let historyData = [];
@@ -228,6 +253,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (e) {
             alert('執行比對時發生系統錯誤，請查看後端 Log');
+        }
+    });
+
+    document.getElementById('generateSqlBtn').addEventListener('click', async () => {
+        if (currentMissingChecks.length === 0) return;
+        
+        const deviceType = document.getElementById('deviceType').value;
+        const modelId = document.getElementById('modelId').value.trim();
+        const sqlOutput = document.getElementById('sqlOutput');
+        
+        try {
+            const response = await fetch('/api/generate-sql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ missingChecks: currentMissingChecks, deviceType, modelId })
+            });
+            const data = await response.json();
+            
+            if (data.error) {
+                alert('產生 SQL 失敗: ' + data.error);
+                return;
+            }
+            
+            sqlOutput.value = data.sql;
+            sqlOutput.style.display = 'block';
+            
+            // 自動滾動到底部
+            sqlOutput.scrollIntoView({ behavior: 'smooth' });
+        } catch (e) {
+            alert('產生 SQL 時發生網路錯誤');
         }
     });
 });

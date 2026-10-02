@@ -1,5 +1,6 @@
 node_modules/
 README.md
+SQL_README.md
 config/*
 !config/.gitkeep
 !config/features/

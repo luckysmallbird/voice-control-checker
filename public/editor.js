@@ -177,9 +177,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const textarea = document.createElement('textarea');
         textarea.className = 'json-textarea';
-        textarea.style.height = '400px';
         textarea.id = 'rawTextarea';
         textarea.value = JSON.stringify(data, null, 2);
+        
+        // 自動跟隨內容調整高度
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight + 5) + 'px';
+        });
         
         const errorMsg = document.createElement('div');
         errorMsg.className = 'error-msg';
@@ -188,6 +193,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         card.appendChild(textarea);
         card.appendChild(errorMsg);
         editorArea.appendChild(card);
+
+        // 插入 DOM 後立刻觸發一次高度計算
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight + 5) + 'px';
     }
 
     // 將畫面上文字框的內容同步回記憶體 (以便移動或複製時資料不流失)

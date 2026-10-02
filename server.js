@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
+const { generateSQL } = require('./sqlGenerator');
 
 const app = express();
 const port = 30530;
@@ -128,6 +129,17 @@ app.post('/api/config-file', (req, res) => {
 
 // ========================
 
+// SQL 產生器 API
+app.post('/api/generate-sql', (req, res) => {
+    try {
+        const { missingChecks, deviceType, modelId } = req.body;
+        const sql = generateSQL(missingChecks, deviceType, modelId);
+        res.json({ sql });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // 執行比對邏輯
 app.post('/api/check', async (req, res) => {
     const { folderPath, modelId, deviceType, selectedFeatures, featureInputs = {} } = req.body;
@@ -185,6 +197,7 @@ app.post('/api/check', async (req, res) => {
                     feature: check.featureLabel,
                     table: check.table,
                     desc: check.desc,
+                    condition: check.condition,
                     status: 'error',
                     message: '找不到對應的 CSV 或檔案無內容'
                 });
@@ -223,11 +236,11 @@ app.post('/api/check', async (req, res) => {
             }
 
             if (exactMatch) {
-                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'pass', message: 'Pass' });
+                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'pass', message: 'Pass' });
             } else if (fallbackMatch) {
-                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'pass', message: 'Pass (use ALL)' });
+                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'pass', message: 'Pass (use ALL)' });
             } else {
-                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'error', message: 'Not Found' });
+                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'error', message: 'Not Found' });
             }
         }
 
