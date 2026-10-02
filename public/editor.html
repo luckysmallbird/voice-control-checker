@@ -29,13 +29,14 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            width: auto; /* Override style.css 100% */
         }
         .btn:hover { background-color: #a88c75; }
-        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary { background-color: #6c757d; width: auto; }
         .btn-secondary:hover { background-color: #5a6268; }
-        .btn-danger { background-color: #dc3545; }
+        .btn-danger { background-color: #dc3545; width: auto; }
         .btn-danger:hover { background-color: #c82333; }
-        .btn-info { background-color: #17a2b8; }
+        .btn-info { background-color: #17a2b8; width: auto; }
         .btn-info:hover { background-color: #138496; }
 
         .card {
@@ -63,9 +64,12 @@
             color: #4a3f35;
             text-decoration: underline;
         }
+        .card-actions {
+            display: flex;
+            gap: 5px;
+        }
         .card-actions button {
             padding: 5px 10px;
-            margin-left: 5px;
             font-size: 12px;
             width: auto;
         }
@@ -104,15 +108,15 @@
 <body>
     <div class="container">
         <div class="editor-topbar">
-            <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
                 <label for="fileSelect" style="font-weight: bold;">選擇設定檔：</label>
-                <select id="fileSelect">
+                <select id="fileSelect" style="margin: 0;">
                     <option value="">載入中...</option>
                 </select>
             </div>
-            <div>
-                <button id="saveBtn" class="btn" style="margin-right: 15px;">儲存所有變更</button>
-                <a href="/" style="background-color: #a88c75; color: white; text-decoration: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; font-size: 14px;">返回比對工具</a>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="/" style="background-color: #a88c75; color: white; text-decoration: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; font-size: 14px; white-space: nowrap;">返回比對工具</a>
+                <button id="saveBtn" class="btn">儲存至json</button>
             </div>
         </div>
 
