@@ -47,6 +47,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 畫出所有 Feature 卡片
     function renderCards() {
         editorArea.innerHTML = '';
+
+        // 全域展開/合併按鈕
+        const controlsDiv = document.createElement('div');
+        controlsDiv.style.marginBottom = '15px';
+        controlsDiv.style.display = 'flex';
+        controlsDiv.style.gap = '10px';
+        
+        const expandAllBtn = document.createElement('button');
+        expandAllBtn.className = 'btn-secondary';
+        expandAllBtn.textContent = '全部展開';
+        expandAllBtn.onclick = () => document.querySelectorAll('.card-body').forEach(b => {
+            b.style.display = 'block';
+            const ta = b.querySelector('textarea');
+            if (ta) { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 5) + 'px'; }
+        });
+        
+        const collapseAllBtn = document.createElement('button');
+        collapseAllBtn.className = 'btn-secondary';
+        collapseAllBtn.textContent = '全部合併';
+        collapseAllBtn.onclick = () => document.querySelectorAll('.card-body').forEach(b => b.style.display = 'none');
+        
+        controlsDiv.appendChild(expandAllBtn);
+        controlsDiv.appendChild(collapseAllBtn);
+        editorArea.appendChild(controlsDiv);
+
         featuresList.forEach((feat, index) => {
             const card = document.createElement('div');
             card.className = 'card';
@@ -62,6 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const actions = document.createElement('div');
             actions.className = 'card-actions';
+            actions.onclick = (e) => e.stopPropagation(); // 避免點擊按鈕時觸發展開/合併
 
             const upBtn = document.createElement('button');
             upBtn.className = 'btn-secondary';
@@ -91,6 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             card.appendChild(header);
 
             const bodyDiv = document.createElement('div');
+            bodyDiv.className = 'card-body';
             bodyDiv.style.display = 'none'; // 預設折疊
 
             // 文字框
@@ -112,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             card.appendChild(bodyDiv);
 
-            title.onclick = () => {
+            header.onclick = () => {
                 if (bodyDiv.style.display === 'none') {
                     bodyDiv.style.display = 'block';
                     textarea.style.height = 'auto';

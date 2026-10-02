@@ -54,15 +54,14 @@
             margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .card-header:hover {
+            background-color: #fcfcfc;
         }
         .card-title {
             font-weight: bold;
             color: #6b5b4a;
-            cursor: pointer;
-        }
-        .card-title:hover {
-            color: #4a3f35;
-            text-decoration: underline;
         }
         .card-actions {
             display: flex;
@@ -115,7 +114,7 @@
                 </select>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
-                <a href="/" style="background-color: #a88c75; color: white; text-decoration: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; font-size: 14px; white-space: nowrap;">返回比對工具</a>
+                <a href="/" class="btn btn-secondary" style="text-decoration: none; font-size: 14px; white-space: nowrap; display: inline-block;">返回比對工具</a>
                 <button id="saveBtn" class="btn">儲存至json</button>
             </div>
         </div>
