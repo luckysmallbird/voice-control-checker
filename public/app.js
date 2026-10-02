@@ -51,6 +51,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     cb.type = 'checkbox';
                     cb.value = feat.id;
                     cb.className = 'feature-checkbox';
+                    if (feat.default_checked) {
+                        cb.checked = true;
+                    }
                     
                     label.appendChild(cb);
                     
@@ -109,7 +112,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const dateStr = new Date(record.timestamp).toLocaleString();
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = `[${dateStr}] 機種: ${record.modelId} (${record.deviceType})`;
+                const folderName = record.folderPath ? record.folderPath.split(/[/\\]/).filter(Boolean).pop() : '未知路徑';
+                option.textContent = `[${dateStr}] 機種: ${record.modelId} (${record.deviceType}) - ${folderName}`;
                 select.appendChild(option);
             });
         } catch (e) {

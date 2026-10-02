@@ -162,11 +162,11 @@ app.post('/api/check', async (req, res) => {
             }
 
             if (exactMatch) {
-                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'pass', message: '資料齊全' });
+                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'pass', message: 'Pass' });
             } else if (fallbackMatch) {
                 results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'pass', message: 'Pass (use ALL)' });
             } else {
-                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'error', message: '缺少資料設定' });
+                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, status: 'error', message: 'Not Found' });
             }
         }
 
