@@ -71,6 +71,63 @@ app.get('/api/history', (req, res) => {
     }
 });
 
+// ====== Editor API ======
+
+// 取得所有設定檔清單
+app.get('/api/config-files', (req, res) => {
+    try {
+        const configDir = path.join(__dirname, 'config');
+        const featuresDir = path.join(__dirname, 'config', 'features');
+        let files = [];
+        
+        if (fs.existsSync(configDir)) {
+            const rootFiles = fs.readdirSync(configDir).filter(f => f.endsWith('.json'));
+            files.push(...rootFiles);
+        }
+        if (fs.existsSync(featuresDir)) {
+            const featureFiles = fs.readdirSync(featuresDir).filter(f => f.endsWith('.json')).map(f => `features/${f}`);
+            files.push(...featureFiles);
+        }
+        res.json(files);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 讀取單一設定檔
+app.get('/api/config-file', (req, res) => {
+    try {
+        const targetPath = req.query.path;
+        if (!targetPath || targetPath.includes('..')) return res.status(400).json({error: '無效的路徑'});
+        const fullPath = path.join(__dirname, 'config', targetPath);
+        if (!fs.existsSync(fullPath)) return res.status(404).json({error: '檔案不存在'});
+        const content = fs.readFileSync(fullPath, 'utf8');
+        res.json(JSON.parse(content));
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 儲存設定檔
+app.post('/api/config-file', (req, res) => {
+    try {
+        const { path: targetPath, content } = req.body;
+        if (!targetPath || targetPath.includes('..')) return res.status(400).json({error: '無效的路徑'});
+        const fullPath = path.join(__dirname, 'config', targetPath);
+        
+        // 確保目錄存在
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+        fs.writeFileSync(fullPath, JSON.stringify(content, null, 2), 'utf8');
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ========================
+
 // 執行比對邏輯
 app.post('/api/check', async (req, res) => {
     const { folderPath, modelId, deviceType, selectedFeatures, featureInputs = {} } = req.body;
@@ -152,7 +209,11 @@ app.post('/api/check', async (req, res) => {
 
                 // 如果符合條件，檢查是否有這台機器
                 if (conditionMet) {
-                    if (row.modelId === modelId) {
+                    // 若該表格根本沒有 modelId 欄位 (例如同義詞表)，則視為符合 (Global Match)
+                    if (row.modelId === undefined) {
+                        exactMatch = true;
+                        break;
+                    } else if (row.modelId === modelId) {
                         exactMatch = true;
                         break; // 完全命中特定型號，不用再找了
                     } else if (row.modelId === 'ALL' || row.modelId === '*') {

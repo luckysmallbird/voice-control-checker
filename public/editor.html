@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Control Checker - 設定檔編輯器</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .editor-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0056b3;
+            padding: 15px 20px;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .editor-topbar select {
+            width: 300px;
+            margin-left: 10px;
+            padding: 8px;
+        }
+        .btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover { background-color: #218838; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-info { background-color: #17a2b8; }
+        .btn-info:hover { background-color: #138496; }
+
+        .card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .card-title {
+            font-weight: bold;
+            color: #0056b3;
+        }
+        .card-actions button {
+            padding: 5px 10px;
+            margin-left: 5px;
+            font-size: 12px;
+            width: auto;
+        }
+        .json-textarea {
+            width: 100%;
+            height: 150px;
+            font-family: monospace;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        .error-msg {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        .add-btn-container {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #666;
+            font-weight: bold;
+        }
+        .add-btn-container:hover {
+            background: #f8f9fa;
+            border-color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="editor-topbar">
+            <div>
+                <a href="/" style="color: white; text-decoration: none; font-weight: bold; margin-right: 20px;">返回比對工具</a>
+                <label for="fileSelect">選擇設定檔：</label>
+                <select id="fileSelect">
+                    <option value="">載入中...</option>
+                </select>
+            </div>
+            <div>
+                <button id="saveBtn" class="btn">儲存所有變更</button>
+            </div>
+        </div>
+
+        <div id="editorArea">
+            <p style="text-align: center; color: #666;">請從上方選擇要編輯的設定檔。</p>
+        </div>
+    </div>
+
+    <script src="editor.js"></script>
+</body>
+</html>
