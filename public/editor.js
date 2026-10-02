@@ -90,18 +90,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             header.appendChild(actions);
             card.appendChild(header);
 
+            const bodyDiv = document.createElement('div');
+            bodyDiv.style.display = 'none'; // 預設折疊
+
             // 文字框
             const textarea = document.createElement('textarea');
             textarea.className = 'json-textarea';
             textarea.id = `textarea_${index}`;
             textarea.value = JSON.stringify(feat, null, 2);
-            card.appendChild(textarea);
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight + 5) + 'px';
+            });
+            bodyDiv.appendChild(textarea);
 
             // 錯誤訊息區塊
             const errorMsg = document.createElement('div');
             errorMsg.className = 'error-msg';
             errorMsg.id = `error_${index}`;
-            card.appendChild(errorMsg);
+            bodyDiv.appendChild(errorMsg);
+
+            card.appendChild(bodyDiv);
+
+            title.onclick = () => {
+                if (bodyDiv.style.display === 'none') {
+                    bodyDiv.style.display = 'block';
+                    textarea.style.height = 'auto';
+                    textarea.style.height = (textarea.scrollHeight + 5) + 'px';
+                } else {
+                    bodyDiv.style.display = 'none';
+                }
+            };
 
             editorArea.appendChild(card);
         });
