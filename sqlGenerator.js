@@ -9,6 +9,38 @@ const TABLE_SCHEMAS = {
     'Attributes_Synonym': ['deviceType', 'traits', 'attributes', 'lang', 'synonym', 'description']
 };
 
+const path = require('path');
+const fs = require('fs');
+
+let sqlDefaults = {};
+try {
+    const defaultsPath = path.join(__dirname, 'config', 'sql_defaults.json');
+    if (fs.existsSync(defaultsPath)) {
+        sqlDefaults = JSON.parse(fs.readFileSync(defaultsPath, 'utf8'));
+    }
+} catch (e) {
+    console.error('Failed to load sql_defaults.json', e);
+}
+
+// 尋找對應的預設值
+function findDefaults(table, deviceType, condition) {
+    if (!sqlDefaults[table]) return null;
+    
+    // 將該家電類型與 ALL 通用的預設值合併作為尋找池 (優先使用特定家電類型)
+    const searchPool = { ...(sqlDefaults[table]['ALL'] || {}), ...(sqlDefaults[table][deviceType] || {}) };
+    
+    // 將 condition 轉換為比對的 key 格式
+    let conditionKeys = [];
+    if (condition.availableModes) conditionKeys.push(`availableModes=${condition.availableModes}`);
+    if (condition.value && condition.value !== '{INPUT_VALUE}') conditionKeys.push(`value=${condition.value}`);
+    if (condition.setting_name && condition.setting_name !== '{INPUT_VALUE}') conditionKeys.push(`setting_name=${condition.setting_name}`);
+    if (condition.trait) conditionKeys.push(`trait=${condition.trait}`);
+    if (condition.attribute) conditionKeys.push(`attribute=${condition.attribute}`);
+    
+    const searchKey = conditionKeys.join('&');
+    return searchPool[searchKey] || null;
+}
+
 /**
  * 根據缺漏的檢查項目，產生對應的 PostgreSQL INSERT 語法
  * @param {Array} missingChecks - 缺漏的檢查物件陣列，包含 { table, condition, featureLabel, desc }
@@ -35,6 +67,12 @@ function generateSQL(missingChecks, deviceType, modelId) {
             return;
         }
 
+        // 嘗試從字典檔找尋預設值
+        const defaults = findDefaults(table, deviceType, check.condition) || {};
+        
+        let hasConflict = false;
+        let conflictCols = [];
+
         // 預設資料 (融合全域變數與 condition 特徵)
         const rowData = { ...check.condition };
         // 針對有這兩個欄位的表格，補上前端傳來的大前提
@@ -43,19 +81,39 @@ function generateSQL(missingChecks, deviceType, modelId) {
 
         // 組裝 Values
         const values = schema.map(col => {
-            const val = rowData[col];
+            let val = rowData[col];
+            
+            // 如果 condition 沒定義，嘗試從字典拿預設值
             if (val === undefined || val === null) {
-                return "''"; // 若 condition 沒定義，預設給空字串作為 Stub
+                val = defaults[col];
             }
+
+            // 如果字典裡標示為衝突，則強制清空並記錄
+            if (val === '_CONFLICT_') {
+                hasConflict = true;
+                conflictCols.push(col);
+                val = '';
+            }
+
+            if (val === undefined || val === null) {
+                return "''"; // 若都沒定義，給空字串
+            }
+            
             // 處理 PostgreSQL 的單引號跳脫 (用兩個單引號代表一個)
             return `'${String(val).replace(/'/g, "''")}'`;
         });
 
-        // 加上雙引號避免大小寫表格名問題 (視您的 Postgres 設定而定，一般安全做法)
+        // 加上雙引號避免大小寫表格名問題
         const sql = `INSERT INTO "${table}" (${schema.join(', ')}) VALUES (${values.join(', ')});`;
         
         // 加上註解說明這是補哪個功能的
         sqlLines.push(`-- 補齊: ${check.featureLabel || ''} - ${check.desc || ''}`);
+        
+        // 若有衝突，印出警告註解
+        if (hasConflict) {
+            sqlLines.push(`-- 警告：此功能有不只一種可能 (不同型號代碼不同)，請自行查閱 SPEC 填寫下列欄位: ${conflictCols.join(', ')}`);
+        }
+        
         sqlLines.push(sql);
         sqlLines.push(''); // 空行分隔
     });
