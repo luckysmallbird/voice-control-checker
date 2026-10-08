@@ -58,17 +58,45 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 提取所需資訊供「單行摘要列」使用
+        const modelId = document.getElementById('modelId').value.trim() || '未填寫';
+        const folderPath = document.getElementById('folderPath').value.trim() || '未填寫';
+        const deviceSelect = document.getElementById('deviceType');
+        const deviceTypeName = deviceSelect.options[deviceSelect.selectedIndex]?.text || '未知家電';
+        
+        const now = new Date();
+        const pad = (n) => n.toString().padStart(2, '0');
+        const displayTime = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        // 將 top-layout 替換為單行美化摘要列
+        const topLayout = clone.querySelector('.top-layout');
+        if (topLayout) {
+            const summaryBar = document.createElement('div');
+            summaryBar.style.backgroundColor = '#f8f9fa';
+            summaryBar.style.borderLeft = '5px solid #466385';
+            summaryBar.style.padding = '12px 20px';
+            summaryBar.style.marginBottom = '20px';
+            summaryBar.style.borderRadius = '4px';
+            summaryBar.style.display = 'flex';
+            summaryBar.style.gap = '30px';
+            summaryBar.style.fontSize = '15px';
+            summaryBar.style.color = '#2c3e50';
+            summaryBar.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            
+            summaryBar.innerHTML = `
+                <div><strong>[比對時間]</strong> ${displayTime}</div>
+                <div><strong>[檢測機種]</strong> ${modelId} (${deviceTypeName})</div>
+                <div><strong>[資料來源]</strong> ${folderPath}</div>
+            `;
+            
+            topLayout.parentNode.replaceChild(summaryBar, topLayout);
+        }
+
         // 移除不必要的互動按鈕與元素 (包含 a 連結)
         const elementsToRemove = clone.querySelectorAll(
-            'button, script, #historySelect, a'
+            'button, script, a'
         );
         elementsToRemove.forEach(el => el.remove());
-
-        // 清除歷史紀錄下拉選單的 label
-        const historyLabel = clone.querySelector('label[for="historySelect"]');
-        if (historyLabel && historyLabel.parentNode) {
-            historyLabel.parentNode.remove(); // 移除整個 form-group
-        }
 
         // 優化 SQL 輸出區塊在靜態報告中的呈現
         const sqlOutput = clone.querySelector('#sqlOutput');
@@ -89,11 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 組裝完整的 HTML 字串
         const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
 
-        // 3. 檔名加上生成的時與分
-        const modelId = document.getElementById('modelId').value.trim() || '未命名';
-        const now = new Date();
-        const pad = (n) => n.toString().padStart(2, '0');
-        
+        // 3. 檔名加上生成的時與分 (變數已於上方宣告)
         const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
         const timeStr = `${pad(now.getHours())}${pad(now.getMinutes())}`;
         
