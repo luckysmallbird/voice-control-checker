@@ -1,6 +1,6 @@
 {
   "name": "voice-control-checker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Checker tool for PJ-VPA CSV data",
   "main": "server.js",
   "scripts": {

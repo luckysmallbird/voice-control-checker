@@ -1,0 +1,98 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('exportReportBtn');
+    if (!exportBtn) return;
+
+    exportBtn.addEventListener('click', () => {
+        // 複製目前整個網頁的 DOM 結構
+        const clone = document.documentElement.cloneNode(true);
+
+        // 因為 cloneNode 不會複製輸入框的動態狀態 (value, checked)，需要手動覆寫
+        const originalInputs = document.querySelectorAll('input, select, textarea');
+        const clonedInputs = clone.querySelectorAll('input, select, textarea');
+
+        originalInputs.forEach((orig, index) => {
+            const cloned = clonedInputs[index];
+            if (!cloned) return;
+
+            if (orig.type === 'checkbox' || orig.type === 'radio') {
+                if (orig.checked) {
+                    cloned.setAttribute('checked', 'checked');
+                }
+                // 1. 勾選框保留原本樣式，但設置為不可點擊
+                cloned.setAttribute('disabled', 'disabled');
+            } else if (orig.tagName.toLowerCase() === 'textarea') {
+                cloned.textContent = orig.value;
+            } else {
+                cloned.setAttribute('value', orig.value);
+            }
+        });
+
+        // 2. 將文字輸入框替換為粗體純文字
+        clonedInputs.forEach((cloned) => {
+            if (cloned.type === 'text' || cloned.tagName.toLowerCase() === 'select') {
+                const span = document.createElement('span');
+                span.textContent = cloned.value || cloned.getAttribute('value') || '(未填寫)';
+                span.style.fontWeight = 'bold'; // 粗體顯示
+                span.style.color = '#2c3e50';
+                span.style.padding = '0 5px';
+                
+                // 將 input 或 select 替換為該 span
+                if (cloned.parentNode) {
+                    cloned.parentNode.replaceChild(span, cloned);
+                }
+            }
+        });
+
+        // 移除不必要的互動按鈕與元素
+        const elementsToRemove = clone.querySelectorAll(
+            'button, script, #historySelect'
+        );
+        elementsToRemove.forEach(el => el.remove());
+
+        // 清除歷史紀錄下拉選單的 label
+        const historyLabel = clone.querySelector('label[for="historySelect"]');
+        if (historyLabel && historyLabel.parentNode) {
+            historyLabel.parentNode.remove(); // 移除整個 form-group
+        }
+
+        // 優化 SQL 輸出區塊在靜態報告中的呈現
+        const sqlOutput = clone.querySelector('#sqlOutput');
+        if (sqlOutput) {
+            const pre = document.createElement('pre');
+            pre.textContent = sqlOutput.textContent;
+            pre.style.background = '#f8f9fa';
+            pre.style.padding = '15px';
+            pre.style.border = '1px solid #ddd';
+            pre.style.borderRadius = '4px';
+            pre.style.whiteSpace = 'pre-wrap';
+            
+            if (sqlOutput.parentNode) {
+                sqlOutput.parentNode.replaceChild(pre, sqlOutput);
+            }
+        }
+
+        // 組裝完整的 HTML 字串
+        const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
+
+        // 3. 檔名加上生成的時與分
+        const modelId = document.getElementById('modelId').value.trim() || '未命名';
+        const now = new Date();
+        const pad = (n) => n.toString().padStart(2, '0');
+        
+        const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+        const timeStr = `${pad(now.getHours())}${pad(now.getMinutes())}`;
+        
+        const filename = `比對報告_${modelId}_${dateStr}_${timeStr}.html`;
+
+        // 觸發下載
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+});
