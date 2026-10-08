@@ -103,8 +103,9 @@ function generateSQL(missingChecks, deviceType, modelId) {
             return `'${String(val).replace(/'/g, "''")}'`;
         });
 
-        // 加上雙引號避免大小寫表格名問題
-        const sql = `INSERT INTO "${table}" (${schema.join(', ')}) VALUES (${values.join(', ')});`;
+        // 加上雙引號避免大小寫表格名與欄位名問題 (PostgreSQL 會將沒加引號的欄位轉小寫)
+        const quotedSchema = schema.map(col => `"${col}"`);
+        const sql = `INSERT INTO "${table}" (${quotedSchema.join(', ')}) VALUES (${values.join(', ')});`;
         
         // 加上註解說明這是補哪個功能的
         sqlLines.push(`-- 補齊: ${check.featureLabel || ''} - ${check.desc || ''}`);
