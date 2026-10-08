@@ -71,7 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 提取所需資訊供「單行摘要列」使用
         const modelId = document.getElementById('modelId').value.trim() || '未填寫';
-        const folderPath = document.getElementById('folderPath').value.trim() || '未填寫';
+        const folderPathRaw = document.getElementById('folderPath').value.trim() || '未填寫';
+        let folderName = folderPathRaw;
+        if (folderName !== '未填寫') {
+            // 支援反斜線與正斜線，去除尾部多餘斜線後取最後一個節點當作資料夾名稱
+            const parts = folderName.replace(/[/\\]+$/, '').split(/[/\\]/);
+            folderName = parts[parts.length - 1] || folderPathRaw;
+        }
+        
         const deviceSelect = document.getElementById('deviceType');
         const deviceTypeName = deviceSelect.options[deviceSelect.selectedIndex]?.text || '未知家電';
         
@@ -98,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryBar.innerHTML = `
                 <div style="flex: 1;"><strong>[比對時間]</strong> ${displayTime}</div>
                 <div style="flex: 1; text-align: center;"><strong>[檢測機種]</strong> ${modelId} (${deviceTypeName})</div>
-                <div style="flex: 1; text-align: right;"><strong>[資料庫資料]</strong> ${folderPath}</div>
+                <div style="flex: 1; text-align: right;"><strong>[資料庫資料]</strong> ${folderName}</div>
             `;
             
             topLayout.parentNode.replaceChild(summaryBar, topLayout);
