@@ -79,6 +79,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const pad = (n) => n.toString().padStart(2, '0');
         const displayTime = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
+        // 更新匯出報告的網頁標籤 (<title>) 與頁面大標題 (<h1>)
+        const reportTitleStr = `比對報告 ${modelId} ${displayTime}`;
+        const titleTag = clone.querySelector('title');
+        if (titleTag) titleTag.textContent = reportTitleStr;
+        const h1Tag = clone.querySelector('h1');
+        if (h1Tag) h1Tag.textContent = reportTitleStr;
+
         // 將 top-layout 替換為單行美化摘要列
         const topLayout = clone.querySelector('.top-layout');
         if (topLayout) {
