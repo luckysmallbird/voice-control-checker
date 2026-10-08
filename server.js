@@ -158,26 +158,26 @@ app.post('/api/check', async (req, res) => {
         const featuresConfig = JSON.parse(fs.readFileSync(featurePath));
         let allChecks = [];
         
-        // 展開勾選的功能檢查項目
+        // 展開所有功能檢查項目 (區分勾選與未勾選)
         for (const feature of featuresConfig.features || []) {
-            if (selectedFeatures.includes(feature.id)) {
-                feature.checks.forEach(check => {
-                    const finalCondition = {};
-                    for (const [k, v] of Object.entries(check.condition)) {
-                        if (typeof v === 'string' && v === '{INPUT_VALUE}') {
-                            finalCondition[k] = featureInputs[feature.id];
-                        } else {
-                            finalCondition[k] = v;
-                        }
+            const isSelected = selectedFeatures.includes(feature.id);
+            feature.checks.forEach(check => {
+                const finalCondition = {};
+                for (const [k, v] of Object.entries(check.condition)) {
+                    if (typeof v === 'string' && v === '{INPUT_VALUE}') {
+                        finalCondition[k] = featureInputs[feature.id] || '';
+                    } else {
+                        finalCondition[k] = v;
                     }
-                    allChecks.push({
-                        featureLabel: feature.label,
-                        table: check.table,
-                        desc: check.desc,
-                        condition: finalCondition
-                    });
+                }
+                allChecks.push({
+                    featureLabel: feature.label,
+                    table: check.table,
+                    desc: check.desc,
+                    condition: finalCondition,
+                    isNegative: !isSelected
                 });
-            }
+            });
         }
 
         // 整理需要讀取的表格
@@ -193,14 +193,16 @@ app.post('/api/check', async (req, res) => {
         for (const check of allChecks) {
             const tableData = db[check.table];
             if (tableData.length === 0) {
-                results.push({
-                    feature: check.featureLabel,
-                    table: check.table,
-                    desc: check.desc,
-                    condition: check.condition,
-                    status: 'error',
-                    message: '找不到對應的 CSV 或檔案無內容'
-                });
+                if (!check.isNegative) {
+                    results.push({
+                        feature: check.featureLabel,
+                        table: check.table,
+                        desc: check.desc,
+                        condition: check.condition,
+                        status: 'error',
+                        message: '找不到對應的 CSV 或檔案無內容'
+                    });
+                }
                 continue;
             }
 
@@ -235,12 +237,23 @@ app.post('/api/check', async (req, res) => {
                 }
             }
 
-            if (exactMatch) {
-                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'pass', message: 'Pass' });
-            } else if (fallbackMatch) {
-                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'pass', message: 'Pass (use ALL)' });
+            if (!check.isNegative) {
+                // 正向檢測 (使用者有勾選)
+                if (exactMatch) {
+                    results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'pass', message: 'Pass' });
+                } else if (fallbackMatch) {
+                    results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'pass', message: 'Pass (use ALL)' });
+                } else {
+                    results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'error', message: 'Not Found' });
+                }
             } else {
-                results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'error', message: 'Not Found' });
+                // 反向檢測 (使用者未勾選)
+                // 只有在資料庫「有找到」時，才需要跳出過多警告
+                if (exactMatch) {
+                    results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'warning', message: 'use by EXACT MATCH (多餘設定)' });
+                } else if (fallbackMatch) {
+                    results.push({ feature: check.featureLabel, table: check.table, desc: check.desc, condition: check.condition, status: 'warning', message: 'use by ALL' });
+                }
             }
         }
 

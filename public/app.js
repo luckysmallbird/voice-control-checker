@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         desc: res.desc
                     });
                 }
+            } else if (res.status === 'warning') {
+                statusClass = 'status-warning';
             }
 
             tr.innerHTML = `
@@ -220,7 +222,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedFeatures = Array.from(checkboxes).map(cb => cb.value);
         
         const featureInputs = {};
-        selectedFeatures.forEach(id => {
+        // 將所有功能(無論是否有勾選)的輸入框數值都抓取，供反向檢測使用
+        document.querySelectorAll('.feature-checkbox').forEach(cb => {
+            const id = cb.value;
             const textInput = document.getElementById(`input_${id}`);
             if (textInput) {
                 featureInputs[id] = textInput.value.trim();
