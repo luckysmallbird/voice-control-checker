@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>語音控制機種資料比對工具</title>
+    <title>設定檔關聯性檢測工具</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #466385; margin-bottom: 20px;">
-            <h1 style="border-bottom: none; margin-bottom: 0;">語音控制機種資料比對工具</h1>
+            <h1 style="border-bottom: none; margin-bottom: 0;">設定檔關聯性檢測工具</h1>
             <div id="topActionButtons">
                 <button id="exportReportBtn" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer; margin-right: 10px; width: auto;">匯出成報告</button>
                 <a href="/editor.html" style="background-color: #466385; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px;">前往設定檔編輯器</a>
@@ -18,13 +18,13 @@
         
         <div class="top-layout">
             <div class="section device-section">
-                <h2>1. 機種設定</h2>
+                <h2>1. 目標設定</h2>
                 <div class="form-group">
-                    <label for="modelId">機種名稱 (Model ID)</label>
-                    <input type="text" id="modelId" placeholder="例如: QXK">
+                    <label for="modelId">目標識別碼 (Target ID)</label>
+                    <input type="text" id="modelId" placeholder="例如: TARGET_01">
                 </div>
                 <div class="form-group">
-                    <label for="deviceType">家電類型 (Device Type)</label>
+                    <label for="deviceType">模組類型 (Module Type)</label>
                     <select id="deviceType"></select>
                 </div>
             </div>

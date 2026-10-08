@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             featuresContainer.innerHTML = ''; // 清空
             
             if (!data.features || data.features.length === 0) {
-                featuresContainer.innerHTML = '<p style="color: #666; margin-top: 10px;">目前此家電類型尚無設定檔，請聯絡開發人員新增。 (e.g. config/features/' + deviceType + '.json)</p>';
+                featuresContainer.innerHTML = '<p style="color: #666; margin-top: 10px;">目前此模組類型尚無設定檔，請聯絡開發人員新增。 (e.g. config/features/' + deviceType + '.json)</p>';
                 return;
             }
 
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const option = document.createElement('option');
                 option.value = index;
                 const folderName = record.folderPath ? record.folderPath.split(/[/\\]/).filter(Boolean).pop() : '未知路徑';
-                option.textContent = `[${dateStr}] 機種: ${record.modelId} (${record.deviceType}) - ${folderName}`;
+                option.textContent = `[${dateStr}] 目標: ${record.modelId} (${record.deviceType}) - ${folderName}`;
                 select.appendChild(option);
             });
         } catch (e) {
@@ -168,11 +168,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 綁定切換事件
         typeSelect.addEventListener('change', (e) => {
             renderFeatures(e.target.value);
-            // 切換家電類型時，清空比對報告區塊
+            // 切換模組類型時，清空比對報告區塊
             document.getElementById('reportSection').style.display = 'none';
         });
 
-        // 初始載入第一個家電的功能
+        // 初始載入第一個模組的功能
         if (config.deviceTypes.length > 0) {
             renderFeatures(config.deviceTypes[0].id);
         }
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('modelId').value = record.modelId;
             document.getElementById('deviceType').value = record.deviceType;
 
-            // 2. 重新渲染該家電的 Checkbox (等待完成)
+            // 2. 重新渲染該模組的 Checkbox (等待完成)
             await renderFeatures(record.deviceType);
 
             // 3. 還原勾選狀態與輸入框
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (!folderPath || !modelId || selectedFeatures.length === 0) {
-            alert('請填寫資料夾、機種名稱，並至少勾選一個功能');
+            alert('請填寫資料夾、目標識別碼，並至少勾選一個功能');
             return;
         }
 

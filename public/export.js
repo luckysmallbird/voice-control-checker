@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const deviceSelect = document.getElementById('deviceType');
-        const deviceTypeName = deviceSelect.options[deviceSelect.selectedIndex]?.text || '未知家電';
+        const deviceTypeName = deviceSelect.options[deviceSelect.selectedIndex]?.text || '未知模組';
         
         const now = new Date();
         const pad = (n) => n.toString().padStart(2, '0');
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             summaryBar.innerHTML = `
                 <div style="flex: 1;"><strong>[比對時間]</strong> ${displayTime}</div>
-                <div style="flex: 1; text-align: center;"><strong>[檢測機種]</strong> ${modelId} (${deviceTypeName})</div>
+                <div style="flex: 1; text-align: center;"><strong>[檢測目標]</strong> ${modelId} (${deviceTypeName})</div>
                 <div style="flex: 1; text-align: right;"><strong>[資料庫資料]</strong> ${folderName}</div>
             `;
             

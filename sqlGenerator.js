@@ -26,7 +26,7 @@ try {
 function findDefaults(table, deviceType, condition) {
     if (!sqlDefaults[table]) return null;
     
-    // 將該家電類型與 ALL 通用的預設值合併作為尋找池 (優先使用特定家電類型)
+    // 將該模組類型與 ALL 通用的預設值合併作為尋找池 (優先使用特定模組類型)
     const searchPool = { ...(sqlDefaults[table]['ALL'] || {}), ...(sqlDefaults[table][deviceType] || {}) };
     
     // 將 condition 轉換為比對的 key 格式
@@ -44,8 +44,8 @@ function findDefaults(table, deviceType, condition) {
 /**
  * 根據缺漏的檢查項目，產生對應的 PostgreSQL INSERT 語法
  * @param {Array} missingChecks - 缺漏的檢查物件陣列，包含 { table, condition, featureLabel, desc }
- * @param {String} deviceType - 家電類型 (例如 airDehumidifier)
- * @param {String} modelId - 機種名稱 (例如 QXK)
+ * @param {String} deviceType - 模組類型 (例如 ModuleA)
+ * @param {String} modelId - 目標名稱 (例如 TARGET_01)
  * @returns {String} 產生的 SQL 字串
  */
 function generateSQL(missingChecks, deviceType, modelId) {

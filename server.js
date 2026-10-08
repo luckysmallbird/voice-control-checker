@@ -10,7 +10,7 @@ const port = 30530;
 app.use(express.static('public'));
 app.use(express.json());
 
-// 取得設定檔 (回傳下拉選單用的家電清單)
+// 取得設定檔 (回傳下拉選單用的模組清單)
 app.get('/api/config', (req, res) => {
     try {
         const deviceTypes = JSON.parse(fs.readFileSync(path.join(__dirname, 'config', 'device_types.json')));
@@ -152,7 +152,7 @@ app.post('/api/check', async (req, res) => {
     try {
         const featurePath = path.join(__dirname, 'config', 'features', `${deviceType}.json`);
         if (!fs.existsSync(featurePath)) {
-            return res.status(400).json({ error: '找不到該家電類型的功能設定檔' });
+            return res.status(400).json({ error: '找不到該模組類型的功能設定檔' });
         }
         
         const featuresConfig = JSON.parse(fs.readFileSync(featurePath));
@@ -210,7 +210,7 @@ app.post('/api/check', async (req, res) => {
             let fallbackMatch = false;
 
             for (const row of tableData) {
-                // 過濾不是這個家電類型的資料 (排除沒有 deviceType 欄位的例外表)
+                // 過濾不是這個模組類型的資料 (排除沒有 deviceType 欄位的例外表)
                 if (row.deviceType && row.deviceType !== deviceType) continue;
                 
                 // 檢查 condition 條件是否完全吻合 (嚴格比對)
