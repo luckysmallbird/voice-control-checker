@@ -156,6 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pre.style.lineHeight = '1.5';
             
             if (sqlOutput.parentNode) {
+                const sqlHeader = document.createElement('h2');
+                sqlHeader.textContent = '補齊缺漏資料 SQL';
+                sqlOutput.parentNode.insertBefore(sqlHeader, sqlOutput);
+                
                 sqlOutput.parentNode.replaceChild(pre, sqlOutput);
             }
         } else if (sqlOutput) {
