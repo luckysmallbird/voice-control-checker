@@ -110,6 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         elementsToRemove.forEach(el => el.remove());
 
+        // 移除標題的「3. 」前綴 (因為前面兩大區塊已經被摘要列取代，留著 3 會很怪)
+        clone.querySelectorAll('h2').forEach(h2 => {
+            if (h2.textContent.startsWith('3. ')) {
+                h2.textContent = h2.textContent.replace('3. ', '');
+            }
+        });
+
         // 優化 SQL 輸出區塊在靜態報告中的呈現，並加入輕量離線語法高亮
         const sqlOutput = clone.querySelector('#sqlOutput');
         if (sqlOutput && sqlOutput.textContent.trim().length > 0) {
