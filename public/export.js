@@ -30,11 +30,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!cloned) return;
 
             if (orig.type === 'checkbox' || orig.type === 'radio') {
+                const iconSpan = document.createElement('span');
+                iconSpan.style.fontWeight = 'bold';
+                iconSpan.style.marginRight = '5px';
+                iconSpan.style.fontSize = '16px';
+                
                 if (orig.checked) {
-                    cloned.setAttribute('checked', 'checked');
+                    iconSpan.textContent = '✔';
+                    iconSpan.style.color = '#28a745'; // 綠色勾勾
+                } else {
+                    iconSpan.textContent = '✘';
+                    iconSpan.style.color = '#dc3545'; // 紅色叉叉
                 }
-                // 1. 勾選框保留原本樣式，但設置為不可點擊
-                cloned.setAttribute('disabled', 'disabled');
+                
+                if (cloned.parentNode) {
+                    cloned.parentNode.replaceChild(iconSpan, cloned);
+                }
             } else if (orig.tagName.toLowerCase() === 'textarea') {
                 cloned.textContent = orig.value;
             } else {
