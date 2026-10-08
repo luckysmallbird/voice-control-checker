@@ -103,20 +103,43 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         elementsToRemove.forEach(el => el.remove());
 
-        // 優化 SQL 輸出區塊在靜態報告中的呈現
+        // 優化 SQL 輸出區塊在靜態報告中的呈現，並加入輕量離線語法高亮
         const sqlOutput = clone.querySelector('#sqlOutput');
-        if (sqlOutput) {
+        if (sqlOutput && sqlOutput.textContent.trim().length > 0) {
+            let rawSql = sqlOutput.textContent;
+            
+            // 1. 跳脫 HTML 以防破版
+            let htmlSql = rawSql.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // 2. 標記單引號字串 (橘色)
+            htmlSql = htmlSql.replace(/'([^'\\]*)'/g, '<span style="color: #e67e22;">\'$1\'</span>');
+            
+            // 3. 標記雙引號表格名 (紫色)
+            htmlSql = htmlSql.replace(/"([^"\\]*)"/g, '<span style="color: #9b59b6;">"$1"</span>');
+            
+            // 4. 標記 SQL 關鍵字 (藍色粗體)
+            htmlSql = htmlSql.replace(/\b(INSERT INTO|VALUES|NULL)\b/gi, '<span style="color: #2980b9; font-weight: bold;">$1</span>');
+            
+            // 5. 標記註解 (綠色)
+            htmlSql = htmlSql.replace(/(--.*)/g, '<span style="color: #27ae60;">$1</span>');
+
             const pre = document.createElement('pre');
-            pre.textContent = sqlOutput.textContent;
+            pre.innerHTML = htmlSql; // 改用 innerHTML 來顯示高亮顏色
             pre.style.background = '#f8f9fa';
             pre.style.padding = '15px';
             pre.style.border = '1px solid #ddd';
             pre.style.borderRadius = '4px';
             pre.style.whiteSpace = 'pre-wrap';
+            pre.style.fontFamily = 'monospace';
+            pre.style.lineHeight = '1.5';
             
             if (sqlOutput.parentNode) {
                 sqlOutput.parentNode.replaceChild(pre, sqlOutput);
             }
+        } else if (sqlOutput) {
+            // 如果沒有 SQL，就把整個 SQL 區塊隱藏，保持報告乾淨
+            const sqlBlock = clone.querySelector('#sqlBlock');
+            if (sqlBlock) sqlBlock.style.display = 'none';
         }
 
         // 組裝完整的 HTML 字串
