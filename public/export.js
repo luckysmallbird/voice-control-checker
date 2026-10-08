@@ -2,9 +2,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportBtn = document.getElementById('exportReportBtn');
     if (!exportBtn) return;
 
-    exportBtn.addEventListener('click', () => {
+    exportBtn.addEventListener('click', async () => {
         // 複製目前整個網頁的 DOM 結構
         const clone = document.documentElement.cloneNode(true);
+
+        // 內嵌 CSS 樣式，確保下載後本機開啟時外觀不會跑掉
+        try {
+            const cssResponse = await fetch('style.css');
+            const cssText = await cssResponse.text();
+            const styleTag = document.createElement('style');
+            styleTag.textContent = cssText;
+            clone.querySelector('head').appendChild(styleTag);
+            
+            // 移除原本外部參考的 link
+            const oldLink = clone.querySelector('link[rel="stylesheet"]');
+            if (oldLink) oldLink.remove();
+        } catch (e) {
+            console.error('無法內嵌 CSS', e);
+        }
 
         // 因為 cloneNode 不會複製輸入框的動態狀態 (value, checked)，需要手動覆寫
         const originalInputs = document.querySelectorAll('input, select, textarea');
@@ -43,9 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 移除不必要的互動按鈕與元素
+        // 移除不必要的互動按鈕與元素 (包含 a 連結)
         const elementsToRemove = clone.querySelectorAll(
-            'button, script, #historySelect'
+            'button, script, #historySelect, a'
         );
         elementsToRemove.forEach(el => el.remove());
 
