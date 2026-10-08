@@ -111,17 +111,25 @@ document.addEventListener('DOMContentLoaded', () => {
             // 1. 跳脫 HTML 以防破版
             let htmlSql = rawSql.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             
-            // 2. 標記單引號字串 (橘色)
-            htmlSql = htmlSql.replace(/'([^'\\]*)'/g, '<span style="color: #e67e22;">\'$1\'</span>');
+            // 使用占位符避免 Regex 規則互相干擾 (解決 HTML 屬性雙引號被誤判的問題)
+            let tIdx = 0;
+            const tokens = {};
+            const wrap = (text, color, bold) => {
+                const tk = `___TK${tIdx++}___`;
+                tokens[tk] = `<span style="color: ${color};${bold ? ' font-weight: bold;' : ''}">${text}</span>`;
+                return tk;
+            };
             
-            // 3. 標記雙引號表格名 (紫色)
-            htmlSql = htmlSql.replace(/"([^"\\]*)"/g, '<span style="color: #9b59b6;">"$1"</span>');
-            
-            // 4. 標記 SQL 關鍵字 (藍色粗體)
-            htmlSql = htmlSql.replace(/\b(INSERT INTO|VALUES|NULL)\b/gi, '<span style="color: #2980b9; font-weight: bold;">$1</span>');
-            
-            // 5. 標記註解 (綠色)
-            htmlSql = htmlSql.replace(/(--.*)/g, '<span style="color: #27ae60;">$1</span>');
+            // 2. 依序提取並暫存 (註解最先處理，避免內部引號干擾)
+            htmlSql = htmlSql.replace(/(--.*)/g, m => wrap(m, '#27ae60', false));
+            htmlSql = htmlSql.replace(/'([^'\\]*)'/g, m => wrap(m, '#e67e22', false));
+            htmlSql = htmlSql.replace(/"([^"\\]*)"/g, m => wrap(m, '#9b59b6', false));
+            htmlSql = htmlSql.replace(/\b(INSERT INTO|VALUES|NULL)\b/gi, m => wrap(m, '#2980b9', true));
+
+            // 3. 還原所有占位符為帶有樣式的 HTML
+            for (const tk in tokens) {
+                htmlSql = htmlSql.replace(tk, tokens[tk]);
+            }
 
             const pre = document.createElement('pre');
             pre.innerHTML = htmlSql; // 改用 innerHTML 來顯示高亮顏色
