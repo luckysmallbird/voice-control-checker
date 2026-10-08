@@ -72,21 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const topLayout = clone.querySelector('.top-layout');
         if (topLayout) {
             const summaryBar = document.createElement('div');
-            summaryBar.style.backgroundColor = '#f8f9fa';
-            summaryBar.style.borderLeft = '5px solid #466385';
-            summaryBar.style.padding = '12px 20px';
-            summaryBar.style.marginBottom = '20px';
-            summaryBar.style.borderRadius = '4px';
+            summaryBar.className = 'section'; // 套用與底下一樣的標準格式
             summaryBar.style.display = 'flex';
-            summaryBar.style.gap = '30px';
-            summaryBar.style.fontSize = '15px';
-            summaryBar.style.color = '#2c3e50';
-            summaryBar.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            summaryBar.style.justifyContent = 'space-between';
+            summaryBar.style.alignItems = 'center';
             
             summaryBar.innerHTML = `
-                <div><strong>[比對時間]</strong> ${displayTime}</div>
-                <div><strong>[檢測機種]</strong> ${modelId} (${deviceTypeName})</div>
-                <div><strong>[資料來源]</strong> ${folderPath}</div>
+                <div style="flex: 1;"><strong>[比對時間]</strong> ${displayTime}</div>
+                <div style="flex: 1; text-align: center;"><strong>[檢測機種]</strong> ${modelId} (${deviceTypeName})</div>
+                <div style="flex: 1; text-align: right;"><strong>[資料庫資料]</strong> ${folderPath}</div>
             `;
             
             topLayout.parentNode.replaceChild(summaryBar, topLayout);
